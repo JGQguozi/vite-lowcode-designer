@@ -1,10 +1,10 @@
 <script setup lang="tsx">
-import { markRaw, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import cloneDeep from 'lodash/cloneDeep'
 import draggable from 'vuedraggable'
-import TextAttributeDesign from '../../../components/TextAttributeDesign.vue'
-import InputAttributeDesign from '../../../components/InputAttributeDesign.vue'
-import ImageAttributeDesign from '../../../components/ImageAttributeDesign.vue'
+
+import ImageUIDesign from '../../../components/UIPageDesign/ImageUI.vue'
+import ImageAttributeDesign from '../../../components/BackstageDesign/ImageAttributeDesign.vue'
 
 // 导入draggable组件
 
@@ -15,6 +15,7 @@ enum TYPE_MODEL {
   'AVATOR' = 4,
   'IMAGE' = 5,
 }
+
 interface DrageItem {
   name: string
   type: number
@@ -22,59 +23,91 @@ interface DrageItem {
   group: string
   id?: string
   labelName?: string
+  props?: object
+  children?: object
 }
 const moddelDatas = ref([
+  {
+    name: '图片',
+    type: TYPE_MODEL.IMAGE,
+    icon: 'file-excel',
+    group: 'A',
+    // com: markRaw(ImageAttributeDesign),
+  },
   {
     name: '文本',
     type: TYPE_MODEL.TEXT,
     icon: 'call',
     group: 'A',
-    com: markRaw(TextAttributeDesign),
+    // com: markRaw(TextAttributeDesign),
   },
   {
     name: '输入框',
     type: TYPE_MODEL.INPUT,
     icon: 'chat',
     group: 'A',
-    com: markRaw(InputAttributeDesign),
+    // com: markRaw(InputAttributeDesign),
   },
   { name: '按钮', type: TYPE_MODEL.BUTTON, icon: 'filter', group: 'A' },
   { name: '头像', type: TYPE_MODEL.AVATOR, icon: 'file-excel', group: 'A' },
-  {
-    name: '图片',
-    type: TYPE_MODEL.IMAGE,
-    icon: 'file-excel',
-    group: 'A',
-    com: markRaw(ImageAttributeDesign),
-  },
 ])
 const dragDatas = ref<DrageItem[]>([
   // { name: "头像", type: TYPE_MODEL.AVATOR, icon: "file-excel", group: 'A' },
 ])
-const currentIndex = ref<number>(0)
-const currentComponent = reactive({
-  com: moddelDatas.value[0].com,
-})
+
+const currentIndex = ref<number>(-1)
+
+const currCompontent = ref<any>('')
+
 const state = reactive({
   message: 'A组只能往B组拖到一个元素',
   groupA: { name: 'itxst', pull: 'clone', put: false },
   groupB: 'itxst',
 })
+// 设置属性区域
+function chooseSetAttribute(event: object, element: object, index: number) {
+  console.log('设置属性区域', event, index, element, dragDatas.value)
+  const dragDatasTarget = dragDatas.value[index]
+  // 防止数据更新缓慢，加一重验证
+  if (dragDatasTarget.id !== element.id)
+    return
+  currentIndex.value = index
+  currCompontent.value = ImageAttributeDesign
+}
+// 映射组件
+function pairUiDesignCom(type: number) {
+  let com: any
+  switch (type) {
+    case TYPE_MODEL.IMAGE:
+      com = ImageUIDesign
+      break
 
+    default:
+      com = 'None'
+      break
+  }
+  return com
+}
+// 创建模型
 function cloneHandler(e: any) {
-  console.warn('cloneHandler', e)
   const id = createId()
   const targetObject = cloneDeep(e)
   const { type } = targetObject
   let componentSetting = {}
-
+  console.warn('cloneHandler', e, targetObject, type)
+  const uiDesignCom = pairUiDesignCom(type) !== 'None' ? pairUiDesignCom(type) : ''
+  let independentAttribute = {}
   switch (type) {
     case TYPE_MODEL.TEXT:
+      break
     case TYPE_MODEL.INPUT:
-      componentSetting = {
-        ...targetObject,
-        id,
-        labelName: '',
+      break
+    case TYPE_MODEL.IMAGE:
+      independentAttribute = {
+        width: '120px',
+        height: '120px',
+        url: 'https://tdesign.gtimg.com/demo/demo-image-1.png',
+        fit: 'cover',
       }
       break
     case TYPE_MODEL.BUTTON:
@@ -84,7 +117,20 @@ function cloneHandler(e: any) {
     default:
       break
   }
-
+  componentSetting = {
+    ...targetObject,
+    props: { ...independentAttribute },
+    id,
+    labelName: '',
+    uiDesignCom,
+    children: [],
+  }
+  // 首次预先进入属性编辑区域
+  if (currentIndex.value === -1) {
+    currentIndex.value = 0
+    currCompontent.value = ImageAttributeDesign
+  }
+  console.log('componentSetting', componentSetting)
   return componentSetting
 }
 
@@ -130,37 +176,12 @@ function createId() {
     return '1122334455'
   return valueFun()
 }
-// 创建模型
-function createModelNode(e: any) {
-  const id = createId()
-  const targetObject = cloneDeep(e)
-  const { type } = targetObject
-
-  switch (type) {
-    case TYPE_MODEL.TEXT:
-    case TYPE_MODEL.INPUT:
-      dragDatas.value.push({
-        ...targetObject,
-        id,
-        labelName: '',
-      })
-      break
-    case TYPE_MODEL.BUTTON:
-      break
-    case TYPE_MODEL.AVATOR:
-      break
-    default:
-      break
-  }
-}
 </script>
 
 <template>
   <t-layout class="layoutArea">
     <t-aside class="leftAside">
-      <t-divider align="left" theme="vertical">
-        本地控件区域
-      </t-divider>
+      <t-divider align="left" theme="vertical"> 本地控件区域 </t-divider>
       <!-- <div class="msg">{{ state.message }}</div> -->
       <div class="itxst">
         <div class="group">
@@ -183,9 +204,7 @@ function createModelNode(e: any) {
       </div>
     </t-aside>
     <t-layout class="contentArea">
-      <t-divider align="left" theme="vertical">
-        UI 设计区域
-      </t-divider>
+      <t-divider align="left" theme="vertical"> UI 设计区域 </t-divider>
       <t-content>
         <div class="dragDatasShowArea">
           <draggable
@@ -194,21 +213,21 @@ function createModelNode(e: any) {
             :group="state.groupB"
             class="showArea"
           >
-            <template #item="{ element }">
-              <div class="item move">
+            <template #item="{ element, index }">
+              <div
+                v-if="element.uiDesignCom && element.uiDesignCom !== ''"
+                class="item move"
+                @click="chooseSetAttribute($event, element, index)"
+              >
                 <label class="type-name">组件类型：{{ element.name }}</label>
-                <t-space direction="vertical" break-line>
-                  <div v-if="element.type === TYPE_MODEL.TEXT" class="text">
-                    {{ element.labelName }}
-                  </div>
-                  <t-input
-                    v-if="element.type === TYPE_MODEL.INPUT"
-                    v-moodel="input"
-                    placeholder="请输入内容（有默认值）"
-                    @enter="onEnter"
-                    @change="onChange"
-                  />
-                </t-space>
+                <div class="component-nodes">
+                  <Transition name="fade" mode="out-in" appear>
+                    <component
+                      :is="element.uiDesignCom"
+                      :independent="element.props"
+                    />
+                  </Transition>
+                </div>
               </div>
             </template>
           </draggable>
@@ -217,26 +236,15 @@ function createModelNode(e: any) {
     </t-layout>
 
     <t-aside class="rightAside">
-      <t-divider align="left" theme="vertical">
-        属性编辑区
-      </t-divider>
+      <t-divider align="left" theme="vertical"> 属性编辑区 </t-divider>
       <keep-alive>
-        <component :is="currentComponent" />
+        <div v-if="currentIndex > -1">
+          <component
+            :is="currCompontent"
+            :independent="dragDatas[currentIndex].props"
+          />
+        </div>
       </keep-alive>
-      <!-- <t-form labelAlign="top" requiredMark colon submitWithWarningMessage>
-        <t-form-item label="名称" name="name" initial-data="TDesign">
-          <t-input placeholder="请输入内容" />
-        </t-form-item>
-        <t-form-item label="提示内容" name="tel" initial-data="123456">
-          <t-input placeholder="请输入内容" />
-        </t-form-item>
-        <t-form-item label="默认值与否" name="course" initial-data="['1']">
-          <t-checkbox-group>
-            <t-checkbox value="1">是</t-checkbox>
-            <t-checkbox value="2">否</t-checkbox>
-          </t-checkbox-group>
-        </t-form-item>
-      </t-form> -->
     </t-aside>
   </t-layout>
 </template>
@@ -274,6 +282,17 @@ function createModelNode(e: any) {
         text-align: left;
         width: 100%;
         height: 100%;
+        .item {
+          .type-name {
+            margin-bottom: 12px;
+            display: inline-block;
+          }
+          .component-nodes {
+            padding-bottom: 12px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #f5f5f5;
+          }
+        }
       }
     }
   }
@@ -330,6 +349,9 @@ function createModelNode(e: any) {
     }
   }
   .rightAside {
+    .t-form__label--top {
+      text-align: left;
+    }
   }
 }
 </style>
