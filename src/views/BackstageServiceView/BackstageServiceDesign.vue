@@ -72,40 +72,44 @@
 
 <style lang="scss">
 .t-layout__header{
-    img.avator {
-      --s: 50px; /* image size */
-      --b: 2px; /* border thickness */
-      --c: rgb(30 128 255 / 10%); /* border color */
-      --f: 1; /* initial scale */
+  img.avator {
+    --s: 50px; /* image size */
+    --b: 2px; /* border thickness */
+    --c: rgb(30 128 255 / 10%); /* border color */
+    --f: 1; /* initial scale */
 
-      --_g: 50% / calc(100% / var(--f)) 100% no-repeat content-box;
-      --_o: calc((1 / var(--f) - 1) * var(--s) / 2 - var(--b));
+    --_g: 50% / calc(100% / var(--f)) 100% no-repeat content-box;
+    --_o: calc((1 / var(--f) - 1) * var(--s) / 2 - var(--b));
 
-      width: var(--s);
-      aspect-ratio: 1;
-      cursor: pointer;
-      border-radius: 0 0 999px 999px;
-      outline: var(--b) solid var(--c);
-      outline-offset: var(--_o);
-      overflow: hidden;
-      background:
-          radial-gradient(
-            circle closest-side,
-            #ECD078 calc(99% - var(--b)),
-            var(--c) calc(100% - var(--b)) 99%,
-            #0000) var(--_g);
-        mask:
-          linear-gradient(#000 0 0) no-repeat
-          50% calc(-1 * var(--_o)) / calc(100% / var(--f) - 2 * var(--b)) 50%,
-          radial-gradient(
-            circle closest-side,
-            #000 99%,
-            #0000) var(--_g);
-        transform: scale(var(--f));
-        transition: .5s;
-    }
-    img.avator:hover {
-      --f: 1.35; /* hover scale */
-    }
+    width: var(--s);
+    aspect-ratio: 1;
+    cursor: pointer;
+    border-radius: 0 0 999px 999px;
+    outline: var(--b) solid var(--c);
+    outline-offset: var(--_o);
+    overflow: hidden;
+    background:
+        radial-gradient(
+          circle closest-side,
+          #ECD078 calc(99% - var(--b)),
+          var(--c) calc(100% - var(--b)) 99%,
+          #0000) var(--_g);
+      mask:
+        linear-gradient(#000 0 0) no-repeat
+        50% calc(-1 * var(--_o)) / calc(100% / var(--f) - 2 * var(--b)) 50%,
+        radial-gradient(
+          circle closest-side,
+          #000 99%,
+          #0000) var(--_g);
+      transform: scale(var(--f));
+      transition: .5s;
   }
+  img.avator:hover {
+    --f: 1.35; /* hover scale */
+  }
+}
+.t-layout__content{
+  height: 100vh;
+  overflow: hidden;
+}
 </style>

@@ -1,13 +1,13 @@
 <script lang="ts">
 export default {
-  name: "ImageAttributeDesign",
-};
+  name: 'ImageAttributeDesign',
+}
 </script>
 
 <script lang="ts" setup>
-const props = defineProps(["independent"]);
+const props = defineProps(['independent'])
 
-console.log("props", props);
+console.log('props', props)
 </script>
 
 <template>
@@ -19,12 +19,16 @@ console.log("props", props);
     :data="props.independent"
     submit-with-warning-message
   >
+    <t-form-item label="名称" name="labelName">
+      <t-input v-model="props.independent.labelName" placeholder="请输入内容" />
+    </t-form-item>
     <t-form-item label="长" name="width">
       <t-input v-model="props.independent.width" placeholder="请输入内容" />
     </t-form-item>
     <t-form-item label="宽" name="height">
       <t-input v-model="props.independent.height" placeholder="请输入内容" />
     </t-form-item>
+    
   </t-form>
 </template>
 

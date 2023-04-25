@@ -1,13 +1,13 @@
 <script lang="ts">
 export default {
-  name: "ImageUIDesign",
-};
+  name: 'ImageUIDesign',
+}
 </script>
 
 <script lang="ts" setup>
-const props = defineProps(["independent"]);
+const props = defineProps(['independent'])
 
-console.log("props", props);
+console.log('props', props)
 </script>
 
 <template>

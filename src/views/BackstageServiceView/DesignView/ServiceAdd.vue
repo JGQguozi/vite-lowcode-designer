@@ -97,12 +97,14 @@ function cloneHandler(e: any) {
   console.warn('cloneHandler', e, targetObject, type)
   const uiDesignCom = pairUiDesignCom(type) !== 'None' ? pairUiDesignCom(type) : ''
   let independentAttribute = {}
+  let labelName = ''
   switch (type) {
     case TYPE_MODEL.TEXT:
       break
     case TYPE_MODEL.INPUT:
       break
     case TYPE_MODEL.IMAGE:
+      labelName = '图片'
       independentAttribute = {
         width: '120px',
         height: '120px',
@@ -119,9 +121,9 @@ function cloneHandler(e: any) {
   }
   componentSetting = {
     ...targetObject,
-    props: { ...independentAttribute },
+    props: { ...independentAttribute, labelName },
     id,
-    labelName: '',
+    name: '',
     uiDesignCom,
     children: [],
   }
@@ -181,7 +183,9 @@ function createId() {
 <template>
   <t-layout class="layoutArea">
     <t-aside class="leftAside">
-      <t-divider align="left" theme="vertical"> 本地控件区域 </t-divider>
+      <t-divider align="left" theme="vertical">
+        本地控件区域
+      </t-divider>
       <!-- <div class="msg">{{ state.message }}</div> -->
       <div class="itxst">
         <div class="group">
@@ -204,22 +208,29 @@ function createId() {
       </div>
     </t-aside>
     <t-layout class="contentArea">
-      <t-divider align="left" theme="vertical"> UI 设计区域 </t-divider>
+      <t-divider align="left" theme="vertical">
+        UI 设计区域
+      </t-divider>
       <t-content>
-        <div class="dragDatasShowArea">
+        <t-list class="dragDatasShowArea">
           <draggable
             :list="dragDatas"
             ghost-class="ghost"
             :group="state.groupB"
             class="showArea"
+            :sort="true"
           >
             <template #item="{ element, index }">
               <div
                 v-if="element.uiDesignCom && element.uiDesignCom !== ''"
-                class="item move"
+                :class="index === currentIndex ? 'item actived' : 'item'"
                 @click="chooseSetAttribute($event, element, index)"
               >
-                <label class="type-name">组件类型：{{ element.name }}</label>
+                <div class="component-top-tools">
+                  <label class="type-name">{{ element.props.labelName }}</label>
+                  <t-button size="small" variant="text">删除</t-button>
+                </div>
+                
                 <div class="component-nodes">
                   <Transition name="fade" mode="out-in" appear>
                     <component
@@ -231,12 +242,19 @@ function createId() {
               </div>
             </template>
           </draggable>
-        </div>
+        </t-list>
+        <t-back-top
+          container=".dragDatasShowArea"
+          :visible-height="0"
+          class="back-top"
+        />
       </t-content>
     </t-layout>
 
     <t-aside class="rightAside">
-      <t-divider align="left" theme="vertical"> 属性编辑区 </t-divider>
+      <t-divider align="left" theme="vertical">
+        属性编辑区
+      </t-divider>
       <keep-alive>
         <div v-if="currentIndex > -1">
           <component
@@ -256,7 +274,11 @@ function createId() {
 .layoutArea {
   display: flex;
   height: 100%;
-  .leftAside,
+  .leftAside{
+    width: 200px;
+    height: 100%;
+    padding: 0 24px 24px 24px;
+  }
   .rightAside {
     width: 300px;
     height: 100%;
@@ -265,10 +287,11 @@ function createId() {
   .contentArea {
     flex: 1;
     min-width: 0;
-    height: 100%;
+    height: 100vh;
     margin: 0 20px;
     background-color: #fff;
-    padding: 0 24px 24px 24px;
+    padding: 0;
+    position: relative;
     .group {
       height: 100%;
       .uiDesignView {
@@ -277,20 +300,35 @@ function createId() {
     }
     .dragDatasShowArea {
       width: 100%;
-      height: 100%;
-      .showArea {
-        text-align: left;
-        width: 100%;
+      height: calc(100% - 126px);
+      overflow-y: scroll;
+      overflow-x: hidden;
+      .t-list__inner {
         height: 100%;
-        .item {
-          .type-name {
-            margin-bottom: 12px;
-            display: inline-block;
-          }
-          .component-nodes {
-            padding-bottom: 12px;
-            margin-bottom: 6px;
-            border-bottom: 1px solid #f5f5f5;
+        .showArea {
+          text-align: left;
+          width: 100%;
+          height: 100%;
+          .item {
+            cursor: pointer;
+            padding: 12px 12px 2px;
+            &.actived {
+              background-color: #f5f5f5;
+            }
+            .component-top-tools {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              .type-name {
+                margin-bottom: 12px;
+                display: inline-block;
+              }
+            }
+            .component-nodes {
+              padding-bottom: 12px;
+              margin-bottom: 6px;
+              border-bottom: 1px solid #f5f5f5;
+            }
           }
         }
       }
@@ -322,9 +360,12 @@ function createId() {
         height: 36px;
         user-select: none;
         cursor: pointer;
+        border-radius: 4px;
         &:hover {
           background-color: var(--td-brand-color-7);
-          color: #fff !important;
+          span, label {
+            color: #fff !important;
+          }
         }
         label {
           padding: 6px 10px;
